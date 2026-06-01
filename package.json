@@ -1,0 +1,40 @@
+{
+  "name": "rpa-web-platform",
+  "version": "0.1.0",
+  "description": "RPA 및 자동화 툴 웹 통합환경",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@8.0.0",
+  "workspaces": [
+    "apps/frontend",
+    "apps/backend",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r --parallel run build",
+    "lint": "pnpm -r --parallel run lint",
+    "type-check": "pnpm -r --parallel run type-check",
+    "test": "pnpm -r --parallel run test",
+    "test:unit": "pnpm -r run test",
+    "test:pre-deploy": "node .claude/commands/agents/pre-deploy.cjs",
+    "setup": "node .claude/commands/setup.cjs",
+    "create": "node .claude/commands/create.cjs",
+    "db:reset": "node .claude/commands/db-reset.cjs",
+    "db:seed": "node .claude/commands/db-seed.cjs",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "apps/frontend/src/**/*.{ts,tsx}": [
+      "eslint --fix"
+    ],
+    "apps/backend/src/**/*.ts": [
+      "eslint --fix"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.7",
+    "typescript": "^5.3.0"
+  }
+}
