@@ -64,6 +64,20 @@ Notion을 CMS로 활용한 모던한 개인 기술 블로그입니다. Notion에
 
 ---
 
+## 📅 개발 로드맵
+
+### Phase별 핵심 순서
+
+**Phase 1**: 프로젝트 초기 설정 및 Notion API 연동  
+**Phase 2**: Notion API 함수 및 공통 UI 컴포넌트  
+**Phase 3**: 블로그 홈·목록·상세 페이지 구현  
+**Phase 4**: 카테고리·태그·관련글 추가 기능  
+**Phase 5**: SEO 최적화 및 Vercel 배포
+
+**자세한 일정**: [`docs/ROADMAP.md`](docs/ROADMAP.md) 참고
+
+---
+
 ## 📁 프로젝트 구조
 
 ```
