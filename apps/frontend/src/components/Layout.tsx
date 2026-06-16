@@ -39,6 +39,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             {/* Desktop menu */}
             {isAuthenticated ? (
               <div className="hidden sm:flex items-center gap-4">
+                {user?.role === 'ADMIN' && (
+                  <Link to="/reports" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
+                    신고 관리
+                  </Link>
+                )}
                 <div className="text-sm text-gray-600">
                   <p className="font-medium text-gray-900">{user?.name}</p>
                   <p className="text-gray-500">{user?.email}</p>
@@ -75,6 +80,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             <div className="sm:hidden border-t border-gray-200 py-4 space-y-2">
               {isAuthenticated ? (
                 <>
+                  {user?.role === 'ADMIN' && (
+                    <Link to="/reports" className="block px-2 py-2 text-sm text-gray-700 hover:text-blue-600">
+                      신고 관리
+                    </Link>
+                  )}
                   <div className="px-2 py-2 text-sm">
                     <p className="font-medium text-gray-900">{user?.name}</p>
                     <p className="text-gray-500 text-xs">{user?.email}</p>

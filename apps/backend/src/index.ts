@@ -5,6 +5,7 @@ import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth.routes';
 import workflowRoutes from './routes/workflow.routes';
+import reportRoutes from './routes/report.routes';
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.get('/health', (req, res) => {
 // API 라우트
 app.use('/api/auth', authRoutes);
 app.use('/api/workflows', workflowRoutes);
+app.use('/api/reports', reportRoutes);
 
 // 404 핸들러
 app.use((req, res) => {

@@ -20,6 +20,8 @@ model User {
 
   workflows Workflow[]
   executions Execution[]
+  posts     Post[]
+  reports   Report[]
 }
 
 enum UserRole {
@@ -90,4 +92,41 @@ enum ExecutionStatus {
   SUCCESS
   FAILED
   CANCELLED
+}
+
+// 게시글 모델
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports   Report[]
+
+  @@index([authorId])
+}
+
+// 신고 모델
+model Report {
+  id        String       @id @default(cuid())
+  postId    String
+  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter  User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason    String
+  status    ReportStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([postId])
+  @@index([reporterId])
+  @@index([status])
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
 }

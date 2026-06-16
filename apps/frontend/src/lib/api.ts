@@ -44,4 +44,12 @@ export const api = {
       apiClient.put(`/workflows/${id}`, data),
     delete: (id: string) => apiClient.delete(`/workflows/${id}`),
   },
+
+  // 신고
+  reports: {
+    list: (params?: { status?: 'PENDING' | 'RESOLVED'; page?: number; limit?: number }) =>
+      apiClient.get('/reports', { params }),
+    resolve: (id: string) =>
+      apiClient.patch(`/reports/${id}/resolve`),
+  },
 };

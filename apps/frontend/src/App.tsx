@@ -6,6 +6,7 @@ import { Layout } from './components/Layout';
 import { SignIn } from './pages/SignIn';
 import { SignUp } from './pages/SignUp';
 import { Home } from './pages/Home';
+import { Reports } from './pages/Reports';
 
 function App() {
   const { loadFromStorage } = useAuthStore();
@@ -26,6 +27,15 @@ function App() {
           element={
             <Layout>
               <Home />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/reports"
+          element={
+            <Layout>
+              <Reports />
             </Layout>
           }
         />
