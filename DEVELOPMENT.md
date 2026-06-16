@@ -1,269 +1,202 @@
-# 개발 가이드
+# 개발 환경 설정 가이드
 
-## 폴더 구조
+## 프로젝트 구조
 
-### Backend (`apps/backend`)
 ```
-src/
-├── config/          # 환경 설정
-├── controller/      # HTTP 요청 처리
-├── service/         # 비즈니스 로직
-├── repository/      # 데이터 접근
-├── middleware/      # Express 미들웨어
-├── routes/          # API 라우트
-├── dto/             # 데이터 전송 객체
-├── types/           # TypeScript 타입
-└── index.ts         # 진입점
-
-prisma/
-├── schema.prisma    # 데이터베이스 스키마
-└── migrations/      # 마이그레이션 파일
+├── apps/
+│   ├── frontend/       # React (Vite) - 포트 5173
+│   └── backend/        # Express.js - 포트 3000
+├── packages/
+│   └── shared/         # 공유 타입 및 유틸
+├── docker-compose.yml  # PostgreSQL 컨테이너
 ```
 
-### Frontend (`apps/frontend`)
-```
-src/
-├── components/      # React 컴포넌트
-│   ├── ui/         # 기본 UI 컴포넌트
-│   └── Layout.tsx  # 레이아웃
-├── pages/          # 페이지 컴포넌트
-├── store/          # Zustand 상태 관리
-├── lib/            # 유틸리티 함수
-├── styles/         # 전역 스타일
-├── App.tsx         # 루트 컴포넌트
-└── main.tsx        # 진입점
+## 1️⃣ 사전 준비
 
-index.html          # HTML 템플릿
-```
+### 필수 설치
+- **Node.js 18+**
+- **pnpm 8.0+** (패키지 매니저)
+- **PostgreSQL 14+** 또는 Docker
 
-## 개발 명령어
-
-### 프로젝트 전체
+### 설치 확인
 ```bash
-# 개발 서버 시작
-pnpm dev
-
-# 빌드
-pnpm build
-
-# 타입 체크
-pnpm type-check
-
-# 린트
-pnpm lint
+node --version  # v18+
+pnpm --version  # 8.0+
 ```
 
-### 백엔드 전용
+---
+
+## 2️⃣ PostgreSQL 설정
+
+### 옵션 A: Docker 사용 (권장 - 가장 간단)
+
+**1. Docker Desktop 설치**
+- https://www.docker.com/products/docker-desktop
+
+**2. PostgreSQL 컨테이너 시작**
+```bash
+docker-compose up -d
+```
+
+**3. 상태 확인**
+```bash
+docker ps  # rpa_postgres 컨테이너 실행 중인지 확인
+```
+
+**4. 연결 정보**
+- Host: `localhost`
+- Port: `5432`
+- User: `user`
+- Password: `password`
+- Database: `rpa_db`
+
+---
+
+### 옵션 B: 로컬 PostgreSQL 설치
+
+**Windows:**
+- https://www.postgresql.org/download/windows/
+
+**macOS:**
+```bash
+brew install postgresql
+brew services start postgresql
+```
+
+**Ubuntu:**
+```bash
+sudo apt-get install postgresql postgresql-contrib
+```
+
+**데이터베이스 생성:**
+```bash
+psql -U postgres
+CREATE DATABASE rpa_db;
+CREATE USER user WITH PASSWORD 'password';
+GRANT ALL PRIVILEGES ON DATABASE rpa_db TO user;
+\q
+```
+
+---
+
+### 옵션 C: 온라인 DB (Supabase, Railway)
+
+**Supabase** (무료)
+1. https://supabase.com 가입
+2. 새 프로젝트 생성
+3. Connection String 복사
+
+---
+
+## 3️⃣ 백엔드 설정
+
+### .env 파일 설정
+
 ```bash
 cd apps/backend
-
-# 개발 서버
-pnpm dev
-
-# Prisma 마이그레이션
-pnpm exec prisma migrate dev
-pnpm exec prisma migrate reset
-
-# Prisma Studio (DB GUI)
-pnpm exec prisma studio
 ```
 
-### 프론트엔드 전용
-```bash
-cd apps/frontend
+`.env` 파일을 생성하고 아래 내용 입력:
 
-# 개발 서버
-pnpm dev
+```env
+# 데이터베이스
+DATABASE_URL="postgresql://user:password@localhost:5432/rpa_db"
 
-# 빌드
-pnpm build
-
-# 미리보기
-pnpm preview
-```
-
-## 데이터베이스 마이그레이션
-
-### 첫 번째 마이그레이션
-```bash
-cd apps/backend
-pnpm exec prisma migrate dev --name init
-```
-
-### 스키마 변경 후
-```bash
-# 마이그레이션 생성 및 적용
-pnpm exec prisma migrate dev --name <마이그레이션-이름>
-
-# 예: pnpm exec prisma migrate dev --name add_execution_logs
-```
-
-### 마이그레이션 리셋 (주의!)
-```bash
-# 데이터베이스 초기화 및 마이그레이션 다시 실행
-pnpm exec prisma migrate reset
-```
-
-## API 개발 패턴
-
-### 새로운 엔드포인트 추가 순서
-
-1. **DTO 정의** (`src/dto/`)
-```typescript
-export const CreateItemSchema = z.object({
-  name: z.string(),
-});
-
-export type CreateItemRequest = z.infer<typeof CreateItemSchema>;
-```
-
-2. **Repository 추가** (`src/repository/`)
-```typescript
-export class ItemRepository {
-  async create(data: CreateItemData) {
-    return prisma.item.create({ data });
-  }
-}
-```
-
-3. **Service 추가** (`src/service/`)
-```typescript
-export class ItemService {
-  async createItem(context: ServiceContext, request: CreateItemRequest) {
-    return itemRepository.create({
-      ...request,
-      userId: context.userId,
-    });
-  }
-}
-```
-
-4. **Controller 추가** (`src/controller/`)
-```typescript
-export class ItemController {
-  async create(req: AuthRequest, res: Response) {
-    const request = CreateItemSchema.parse(req.body);
-    const item = await itemService.createItem(
-      { userId: req.user!.id },
-      request,
-    );
-    res.status(201).json({ success: true, data: item });
-  }
-}
-```
-
-5. **라우트 추가** (`src/routes/`)
-```typescript
-router.post('/', (req, res, next) =>
-  itemController.create(req as any, res).catch(next),
-);
-```
-
-## 프론트엔드 개발 패턴
-
-### 새로운 페이지/컴포넌트 추가
-
-1. **페이지 생성** (`src/pages/`)
-```typescript
-export const ItemList = () => {
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    api.items.list().then(res => setItems(res.data.data.items));
-  }, []);
-
-  return <div>{/* JSX */}</div>;
-};
-```
-
-2. **라우트에 추가** (`src/App.tsx`)
-```typescript
-<Route path="/items" element={<ItemList />} />
-```
-
-3. **네비게이션에 추가** (필요시 `src/components/Layout.tsx`)
-
-## 타입 안전성
-
-### any 타입 금지
-```typescript
-// ❌ 금지
-const result: any = fetchData();
-
-// ✅ 허용
-interface Data {
-  id: string;
-  name: string;
-}
-const result: Data = fetchData();
-```
-
-### Zod로 런타임 검증
-```typescript
-const schema = z.object({
-  email: z.string().email(),
-  age: z.number().min(0),
-});
-
-const data = schema.parse(request.body);
-```
-
-## 에러 처리
-
-### 백엔드
-```typescript
-if (condition) {
-  throw new AppError('ERROR_CODE', 'Error message', 400);
-}
-```
-
-### 프론트엔드
-```typescript
-try {
-  await api.items.create(data);
-} catch (error) {
-  console.error('Failed:', error);
-  // UI에서 에러 표시
-}
-```
-
-## 환경 변수
-
-### 백엔드 (`.env`)
-```
-DATABASE_URL=postgresql://user:password@localhost:5432/rpa_db
+# 서버
 PORT=3000
-JWT_SECRET=your-secret
-JWT_EXPIRATION=24h
 NODE_ENV=development
+
+# JWT
+JWT_SECRET=your-secret-key-here-min-32-chars
+JWT_EXPIRATION=24h
 ```
 
-## 문제 해결
+### Prisma 마이그레이션
 
-### 마이그레이션 에러
 ```bash
-# 마이그레이션 상태 확인
-pnpm exec prisma migrate status
+cd apps/backend
 
-# 마이그레이션 실패 시 리셋 (개발 환경만)
-pnpm exec prisma migrate reset
+# 마이그레이션 실행 (Post, Report 모델 생성)
+npx prisma migrate dev --name add-post-report
+
+# Prisma Studio (UI로 데이터 관리)
+npx prisma studio
 ```
 
-### 타입 에러
-```bash
-# 전체 타입 체크
-pnpm type-check
+---
 
-# TypeScript 캐시 초기화
-rm -rf dist/
-pnpm build
-```
+## 4️⃣ 프로젝트 시작
 
-### 모듈 찾기 안 함
+### 루트 디렉토리에서
+
 ```bash
-# 의존성 재설치
+# 1. 의존성 설치
 pnpm install
 
-# 심링크 재생성 (monorepo)
-pnpm install --force
+# 2. 개발 서버 시작 (백엔드 + 프론트엔드 동시 실행)
+pnpm dev
 ```
+
+### 개별 실행
+
+```bash
+# 백엔드만
+pnpm --filter=@rpa/backend dev
+
+# 프론트엔드만
+pnpm --filter=@rpa/frontend dev
+```
+
+---
+
+## 5️⃣ 테스트 데이터 생성
+
+```bash
+cd apps/backend
+npx prisma studio
+```
+
+**Prisma Studio에서:**
+1. User 테이블 추가
+   - email: admin@test.com
+   - name: 관리자
+   - role: ADMIN
+
+2. Post 테이블 추가
+   - title: 테스트 게시글
+   - content: 내용입니다
+
+3. Report 테이블 추가
+   - reason: 부적절한 콘텐츠
+   - status: PENDING
+
+---
+
+## 6️⃣ 기능 테스트
+
+### 신고 관리 기능
+
+**프론트엔드:**
+- http://localhost:5173 접속
+- 관리자 로그인
+- "신고 관리" 메뉴 확인
+- 신고 목록 표시 확인
+- "처리완료" 버튼 테스트
+
+---
+
+## 🔧 유용한 명령어
+
+```bash
+pnpm type-check   # 타입 체크
+pnpm lint          # 린트 검사
+pnpm test          # 테스트 실행
+pnpm build         # 빌드
+```
+
+---
+
+## 📚 문서
+
+- [ROADMAP.md](docs/ROADMAP.md) - 프로젝트 로드맵
+- [shrimp-rules.md](shrimp-rules.md) - 코딩 규칙

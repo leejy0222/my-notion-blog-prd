@@ -5,14 +5,14 @@ const prisma = new PrismaClient();
 export interface CreateWorkflowData {
   name: string;
   description?: string;
-  definition: Record<string, unknown>;
+  definition: string;
   userId: string;
 }
 
 export interface UpdateWorkflowData {
   name?: string;
   description?: string;
-  definition?: Record<string, unknown>;
+  definition?: string;
   status?: string;
   isActive?: boolean;
 }

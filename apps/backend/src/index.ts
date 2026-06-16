@@ -1,11 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { env } from './config/env';
-import { errorHandler } from './middleware/errorHandler';
-import authRoutes from './routes/auth.routes';
-import workflowRoutes from './routes/workflow.routes';
-import reportRoutes from './routes/report.routes';
+import { env } from './config/env.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import authRoutes from './routes/auth.routes.js';
+import workflowRoutes from './routes/workflow.routes.js';
+import reportRoutes from './routes/report.routes.js';
 
 const app = express();
 

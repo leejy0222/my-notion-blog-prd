@@ -10,6 +10,9 @@
     "git": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-git"]
+    },
+    "shrimp-task-manager": {
+      "command": "mcp-shrimp-task-manager"
     }
   }
 }

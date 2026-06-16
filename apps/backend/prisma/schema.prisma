@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -13,7 +13,7 @@ model User {
   email     String   @unique
   password  String
   name      String
-  role      UserRole @default(USER)
+  role      String   @default("USER")
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -24,12 +24,6 @@ model User {
   reports   Report[]
 }
 
-enum UserRole {
-  ADMIN
-  USER
-  VIEWER
-}
-
 // 자동화 워크플로우
 model Workflow {
   id          String   @id @default(cuid())
@@ -38,12 +32,12 @@ model Workflow {
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // 워크플로우 정의 (JSON)
-  definition  Json
+  // 워크플로우 정의 (JSON 문자열)
+  definition  String
 
   // 상태
-  status      WorkflowStatus @default(DRAFT)
-  isActive    Boolean        @default(false)
+  status      String   @default("DRAFT")
+  isActive    Boolean  @default(false)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -51,12 +45,6 @@ model Workflow {
   executions  Execution[]
 
   @@index([userId])
-}
-
-enum WorkflowStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
 }
 
 // 자동화 실행 기록
@@ -68,15 +56,15 @@ model Execution {
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // 실행 상태
-  status       ExecutionStatus @default(PENDING)
+  status       String    @default("PENDING")
 
   // 실행 결과
-  result       Json?
+  result       String?
   error        String?
 
   startedAt    DateTime?
   completedAt  DateTime?
-  duration     Int?  // 밀리초 단위
+  duration     Int?
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -84,14 +72,6 @@ model Execution {
   @@index([workflowId])
   @@index([userId])
   @@index([status])
-}
-
-enum ExecutionStatus {
-  PENDING
-  RUNNING
-  SUCCESS
-  FAILED
-  CANCELLED
 }
 
 // 게시글 모델
@@ -111,22 +91,17 @@ model Post {
 
 // 신고 모델
 model Report {
-  id        String       @id @default(cuid())
-  postId    String
-  post      Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  postId     String
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   reporterId String
-  reporter  User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  reason    String
-  status    ReportStatus @default(PENDING)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  reporter   User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     String
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([postId])
   @@index([reporterId])
   @@index([status])
-}
-
-enum ReportStatus {
-  PENDING
-  RESOLVED
 }

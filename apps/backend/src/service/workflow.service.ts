@@ -45,7 +45,7 @@ export class WorkflowService {
     const workflow = await workflowRepository.create({
       name: request.name,
       description: request.description,
-      definition: request.definition,
+      definition: JSON.stringify(request.definition),
       userId: context.userId,
     });
 
@@ -69,7 +69,7 @@ export class WorkflowService {
     const updated = await workflowRepository.update(id, {
       name: request.name,
       description: request.description,
-      definition: request.definition,
+      definition: request.definition ? JSON.stringify(request.definition) : undefined,
     });
 
     return this.toResponseDto(updated);

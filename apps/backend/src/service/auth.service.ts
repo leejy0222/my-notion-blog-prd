@@ -55,6 +55,7 @@ export class AuthService {
   }
 
   private generateToken(id: string, email: string, role: string): string {
+    // @ts-expect-error jwt.sign 타입 문제
     return jwt.sign(
       { id, email, role },
       env.jwtSecret,

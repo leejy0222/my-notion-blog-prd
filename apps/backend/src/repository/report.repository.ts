@@ -1,10 +1,10 @@
-import { PrismaClient, ReportStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export class ReportRepository {
   async findAll(
-    status?: ReportStatus,
+    status?: string,
     page: number = 1,
     limit: number = 10,
   ) {
@@ -46,7 +46,7 @@ export class ReportRepository {
     });
   }
 
-  async updateStatus(id: string, status: ReportStatus) {
+  async updateStatus(id: string, status: string) {
     return prisma.report.update({
       where: { id },
       data: { status },
