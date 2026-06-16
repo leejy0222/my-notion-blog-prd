@@ -6,6 +6,7 @@ Notion을 CMS로 활용한 모던한 개인 기술 블로그입니다. Notion에
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-06b6d4?logo=tailwindcss)
 ![Notion API](https://img.shields.io/badge/Notion%20API-v1-000?logo=notion)
+![Vercel Deploy](https://img.shields.io/badge/Vercel-Deployed-000?logo=vercel)
 
 ---
 
